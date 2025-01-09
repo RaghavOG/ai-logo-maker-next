@@ -14,7 +14,6 @@ import { useAuth } from '@clerk/nextjs'
 
 const colorSchemes = [
   { name: 'Scheme 1', colors: ['#F6FEDB', '#E6D3A3', '#D8D174', '#B6C454', '#91972A'] },
- 
   { name: 'Scheme 3', colors: ['#616163', '#44FFD2', '#87F6FF', '#DAF5FF', '#FFBFA0'] },
   { name: 'Scheme 4', colors: ['#F9E0D9', '#E6DBD0', '#7D6167', '#754F5B', '#5D4954'] },
   { name: 'Scheme 5', colors: ['#CACFD6', '#D6E5E3', '#9FD8CB', '#517664', '#2D3319'] },
@@ -144,12 +143,13 @@ export default function CreateLogoPage() {
   }
 
   const handleColorSchemeSelect = (schemeName: string) => {
+    const selectedScheme = colorSchemes.find(scheme => scheme.name === schemeName);
     setFormData(prev => {
-      const newData = { ...prev, colorScheme: schemeName }
-      localStorage.setItem('logoFormData', JSON.stringify(newData))
-      return newData
-    })
-  }
+      const newData = { ...prev, colorScheme: schemeName, customColors: selectedScheme ? selectedScheme.colors : prev.customColors };
+      localStorage.setItem('logoFormData', JSON.stringify(newData));
+      return newData;
+    });
+  };
 
   interface CustomColorChangeHandler {
     (index: number, color: string): void;
@@ -164,6 +164,7 @@ export default function CreateLogoPage() {
       return newData;
     });
   };
+  
 
   const handleNext = () => {
     if (step < 5) setStep(step + 1)

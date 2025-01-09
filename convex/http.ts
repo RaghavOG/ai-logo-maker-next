@@ -4,7 +4,7 @@ import { Webhook } from "svix";
 import { WebhookEvent } from "@clerk/nextjs/server";
 import { api } from "./_generated/api";
 
-// Define types for the webhook event data
+// Define types for the webhook event data  // TODO: Define type  
 type UserEventData = {
   id: string;
   deleted?: boolean;

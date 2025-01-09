@@ -22,6 +22,6 @@ export default defineSchema ({
             designIdea:v.string(),
             theme: v.string(),
         })),
-        tags: v.optional(v.array(v.string())),
+        
     }).index("by_user_id", ["userId"]),
 });
