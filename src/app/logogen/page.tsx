@@ -166,7 +166,7 @@ export default function CreateLogoPage() {
       })
     }
   }
-
+/* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     setMounted(true)
     

@@ -10,7 +10,16 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 
-const LogoCard = ({ logo }: { logo: any }) => {
+type Logo = {
+  _id: string
+  name: string
+  base64: string
+  description?: string
+  _creationTime: number
+}
+
+
+const LogoCard = ({ logo }: { logo: Logo }) => {
   const handleDownload = () => {
     const link = document.createElement('a')
     link.href = logo.base64
