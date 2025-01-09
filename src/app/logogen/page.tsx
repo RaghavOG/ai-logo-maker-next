@@ -17,7 +17,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent } from '@/components/ui/card'
 
-import { Check, Loader2, Download } from 'lucide-react'
+import { Check, Loader2, Download, Plus } from 'lucide-react'
 // import { saveLogo } from '@/lib/actions/logo'
 import { generatePrompt } from "@/app/logogen/_helper"
 import { getImagePrompt } from "@/utils/ai-model"
@@ -98,16 +98,18 @@ const ProcessStep = ({ title, status }: { title: string; status: 'waiting' | 'lo
 )
 
 export default function CreateLogoPage() {
-  const [mounted, setMounted] = useState(false)
-  const { userId, isLoaded } = useAuth()
-  const [step, setStep] = useState(1)
-  const [formData, setFormData] = useState<LogoFormData>({
+  const initialFormData: LogoFormData = {
     title: '',
     description: '',
     colorScheme: '',
     logoStyle: '',
     customColors: ['#FFFFFF', '#FFFFFF', '#FFFFFF', '#FFFFFF', '#FFFFFF'],
-  })
+  }
+
+  const [mounted, setMounted] = useState(false)
+  const { userId, isLoaded } = useAuth()
+  const [step, setStep] = useState(1)
+  const [formData, setFormData] = useState<LogoFormData>(initialFormData)
   const [steps, setSteps] = useState({
     collecting: 'waiting',
     processing: 'waiting',
@@ -123,18 +125,66 @@ export default function CreateLogoPage() {
     retryCount: 0,
     lastAttempt: 0
   })
-
+  
   const router = useRouter()
+  const saveLogo = useMutation(api.logo.saveLogo);
+
+  const handleStartOver = () => {
+    clearStoredData()
+    setStep(1)
+    setFormData(initialFormData)
+    setSteps({
+      collecting: 'waiting',
+      processing: 'waiting',
+      generating: 'waiting',
+      saving: 'waiting'
+    })
+    setGeneratedImage('')
+    setError(null)
+    setGenerationState({
+      prompt: '',
+      isGenerating: false,
+      retryCount: 0,
+      lastAttempt: 0
+    })
+  }
+
+  const clearStoredData = () => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('logoFormData')
+      localStorage.removeItem('logoGenerationStep')
+      localStorage.removeItem('logoGenerationSteps')
+      localStorage.removeItem('generatedLogoImage')
+      localStorage.removeItem('logoGenerationState')
+      
+      // Clear any other related data
+      const keys = Object.keys(localStorage)
+      keys.forEach(key => {
+        if (key.startsWith('logo')) {
+          localStorage.removeItem(key)
+        }
+      })
+    }
+  }
 
   useEffect(() => {
     setMounted(true)
-    const storedData = localStorage.getItem('logoFormData')
-    const storedStep = localStorage.getItem('logoGenerationStep')
-    const storedSteps = localStorage.getItem('logoGenerationSteps')
-    const storedImage = localStorage.getItem('generatedLogoImage')
-    const storedGenerationState = localStorage.getItem('logoGenerationState')
+    
+    // Check if we're starting fresh (coming from home page)
+    const referrer = document.referrer
+    const isFromHome = referrer.endsWith('/') || referrer === ''
+    
+    if (isFromHome) {
+      handleStartOver()
+    } else {
+      // Load stored data only if not coming from home
+      const storedData = localStorage.getItem('logoFormData')
+      const storedStep = localStorage.getItem('logoGenerationStep')
+      const storedSteps = localStorage.getItem('logoGenerationSteps')
+      const storedImage = localStorage.getItem('generatedLogoImage')
+      const storedGenerationState = localStorage.getItem('logoGenerationState')
 
-    if (storedData) {
+      if (storedData) {
         setFormData(JSON.parse(storedData))
       }
       if (storedStep) {
@@ -146,18 +196,20 @@ export default function CreateLogoPage() {
       if (storedImage) {
         setGeneratedImage(storedImage)
       }
-       if (storedGenerationState) {
-      const parsedState = JSON.parse(storedGenerationState)
-      setGenerationState(parsedState)
-      
-      // If there was an ongoing generation, resume it
-      if (parsedState.isGenerating && parsedState.prompt) {
-        resumeImageGeneration(parsedState.prompt)
+      if (storedGenerationState) {
+        const parsedState = JSON.parse(storedGenerationState)
+        setGenerationState(parsedState)
+        
+        if (parsedState.isGenerating && parsedState.prompt) {
+          resumeImageGeneration(parsedState.prompt)
+        }
       }
     }
 
     setIsLoading(false)
-}, [])
+  }, [])
+
+
 
 useEffect(() => {
     if (mounted) {
@@ -189,7 +241,6 @@ useEffect(() => {
     clearStoredData()
   }
     
-const saveLogo = useMutation(api.logo.saveLogo);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -200,13 +251,7 @@ const saveLogo = useMutation(api.logo.saveLogo);
     })
   }
 
-  const clearStoredData = () => {
-    localStorage.removeItem('logoFormData')
-    localStorage.removeItem('logoGenerationStep')
-    localStorage.removeItem('logoGenerationSteps')
-    localStorage.removeItem('generatedLogoImage')
-    localStorage.removeItem('logoGenerationState')
-  }
+
 
   const handleColorSchemeSelect = (schemeName: string) => {
     const selectedScheme = colorSchemes.find(scheme => scheme.name === schemeName);
@@ -358,7 +403,11 @@ const saveLogo = useMutation(api.logo.saveLogo);
       toast.success('Your logo has been generated and saved successfully')
       clearStoredData()
     } catch (error) {
-        console.error('Error saving logo:', error.response || error.message || error);
+        if (axios.isAxiosError(error)) {
+          console.error('Error saving logo:', error.response || error.message || error);
+        } else {
+          console.error('Error saving logo:', error);
+        }
       setSteps(prev => ({ ...prev, saving: 'error' }))
       toast.error('Failed to save the logo. Please try again.')
     }
@@ -542,13 +591,21 @@ const saveLogo = useMutation(api.logo.saveLogo);
                         className="w-[400px] h-[400px] object-contain rounded-lg shadow-lg"
                       />
                     </div>
-                    <div className="flex justify-center">
+                    <div className="flex justify-center gap-4">
                       <Button
                         onClick={handleDownload}
                         className="flex items-center space-x-2"
                       >
                         <Download className="h-4 w-4" />
                         <span>Download Logo</span>
+                      </Button>
+                      <Button
+                        onClick={handleStartOver}
+                        className="flex items-center space-x-2"
+                        variant="outline"
+                      >
+                        <Plus className="h-4 w-4" />
+                        <span>Create New Logo</span>
                       </Button>
                     </div>
                   </div>
