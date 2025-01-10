@@ -41,7 +41,7 @@ export default function Home() {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3, duration: 0.8 }}
           >
-            Generate unique, professional logos instantly with our AI-powered platform. Perfect for businesses of all sizes.
+            Generate unique, professional logos with our AI-powered platform. Perfect for businesses of all sizes.
           </motion.p>
           <motion.p 
             className="text-lg md:text-lg text-gray-600 max-w-xl"

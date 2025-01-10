@@ -19,7 +19,7 @@ const geistMono = localFont({
 
 export const metadata: Metadata = {
   title: "LogoGenix",
-  description: "Share and run code snippets",
+  description: "Generate unique, professional logos with our AI-powered platform.",
 };
 
 export default function RootLayout({
