@@ -13,7 +13,6 @@ const Header = () => {
   const { userId, isLoaded } = useAuth()
   const [mounted, setMounted] = React.useState(false)
   
-  // Use conditional query with "skip"
   const data = useQuery(api.user.getUser, 
     userId && mounted ? { userId } : "skip"
   )
@@ -22,14 +21,13 @@ const Header = () => {
     setMounted(true)
   }, [])
 
-  // Don't render anything until both Clerk is loaded and component is mounted
   if (!isLoaded || !mounted) {
     return (
-      <header className='px-4 py-4 lg:px-32 xl:px-48 2xl:px-56 border border-b-2 border-gray-900'>
+      <header className='px-4 py-4 lg:px-32 xl:px-48 2xl:px-56 border-b-2 border-gray-900 bg-gradient-to-r from-gray-900 to-gray-800'>
         <div className='flex items-center justify-between'>
-          <Link href="/" className="flex items-center space-x-2">
-            <Image src="/logo.jpg" alt="Logo" width={40} height={40} className="rounded-full" />
-            <span className="text-xl font-bold">Logo Genix</span>
+          <Link href="/" className="flex items-center space-x-3">
+            <Image src="/logo.jpg" alt="Logo" width={50} height={50} className="rounded-full" />
+            <span className="text-4xl font-bold text-white">Logo Genix</span>
           </Link>
         </div>
       </header>
@@ -37,36 +35,47 @@ const Header = () => {
   }
 
   return (
-    <header className='px-4 py-4 lg:px-32 xl:px-48 2xl:px-56 border border-b-2 border-gray-900'>
+    <motion.header 
+      initial={{ opacity: 0, y: -50 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className='px-4 py-4 lg:px-32 xl:px-48 2xl:px-56 border-b-2 border-gray-900 bg-gradient-to-r from-gray-900 to-gray-800'
+    >
       <div className='flex items-center justify-between'>
-        <Link href="/" className="flex items-center space-x-2">
-          <Image src="/logo.jpg" alt="Logo" width={40} height={40} className="rounded-full" />
-          <span className="text-xl font-bold">Logo Genix</span>
+        <Link href="/" className="flex items-center space-x-3 group">
+          <motion.div
+            whileHover={{ rotate: 360 }}
+            transition={{ duration: 0.5 }}
+          >
+            <Image src="/logo.jpg" alt="Logo" width={50} height={50} className="rounded-full" />
+          </motion.div>
+          <span className="text-2xl font-bold text-white group-hover:text-yellow-400 transition-colors duration-300">Logo Genix</span>
         </Link>
         
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-6">
           {userId ? (
             <>
               <motion.div
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="text-base font-medium"
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="text-lg font-medium text-white"
               > 
-                Credits: {data?.creditsLeft ?? 0}
+                Credits: <span className="text-yellow-400 font-bold">{data?.creditsLeft ?? 0}</span>
               </motion.div>
               <Link href="/dashboard">
-                <Button className="bg-white text-black transition-transform duration-200 hover:scale-105 hover:bg-gray-200">
+                <Button className="bg-white text-black text-lg font-semibold py-2 px-6 rounded-full transition-all duration-300 hover:bg-yellow-400 hover:text-white hover:scale-105 hover:shadow-lg">
                   Dashboard
                 </Button>
               </Link>
               <motion.div
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={{ opacity: 1, scale: 1 }}
+                whileHover={{ scale: 1.1 }}
               >
                 <UserButton 
                   appearance={{
                     elements: {
-                      avatarBox: "h-10 w-10 transition-transform duration-200 hover:scale-110"
+                      avatarBox: "h-10 w-10 ring-2 ring-yellow-400 transition-all duration-300 hover:ring-4"
                     }
                   }}
                 />
@@ -74,20 +83,22 @@ const Header = () => {
             </>
           ) : (
             <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, scale: 0.5 }}
+              animate={{ opacity: 1, scale: 1 }}
+              whileHover={{ scale: 1.05 }}
             >
               <SignInButton mode="modal">
-                <Button className="bg-white text-black transition-transform duration-200 hover:scale-105 hover:bg-gray-200">
-                  Get Started
+                <Button className="bg-white text-black text-lg font-semibold py-2 px-6 rounded-full transition-all duration-300 hover:bg-yellow-400 hover:text-white hover:scale-105 hover:shadow-lg">
+                  Log In
                 </Button>
               </SignInButton>
             </motion.div>
           )}
         </div>
       </div>
-    </header>
+    </motion.header>
   )
 }
 
 export default Header
+
