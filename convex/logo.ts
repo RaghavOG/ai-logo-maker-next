@@ -96,3 +96,17 @@ export const getUserCredits = query({
     };
   },
 });
+
+export const getRandomLogos = query({
+  args: {},
+  handler: async (ctx) => {
+    const allLogos = await ctx.db
+      .query("logos")
+      .order("desc")
+      .take(8); // Get latest 8 logos
+    
+    // Shuffle the array to get random logos
+    const shuffled = allLogos.sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, 4); // Return 4 random logos
+  },
+});
