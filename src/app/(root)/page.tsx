@@ -18,7 +18,7 @@ export default function Home() {
           className="text-left space-y-6"
         >
           <motion.h1 
-            className="text-5xl sm:text-5xl md:text-6xl font-extrabold text-gray-900 leading-tight"
+            className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-gray-900 leading-tight"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ 
